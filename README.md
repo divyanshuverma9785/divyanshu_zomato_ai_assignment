@@ -1,4 +1,4 @@
-# Roorkee Restaurants RAG Chatbot
+![image](https://github.com/user-attachments/assets/d7393d8c-b05e-402b-a0b6-c99f702fcb23)# Roorkee Restaurants RAG Chatbot
 
 ## Overview
 This project provides a fully local, open-source RAG (Retrieval Augmented Generation) conversational assistant that answers queries about top restaurants and their menus in Roorkee, India. The system uses scraped restaurant data, advanced text embeddings, and a Hugging Face LLM to power natural, context-rich food and restaurant Q&A.
@@ -21,6 +21,9 @@ To create or update your local `top_5_roorkee_resturants_data.json` (restaurant 
 3. **Call** `scrape_bulk_zomato(restaurant_urls, output_path="top_5_roorkee_resturants_data.json")`.
 
 This will create the file your chatbot pipeline expects, with all fields (`name`, `location`, `contact`, `operating_hours`, `menu`, etc.) perfectly matched to the RAG knowledge base schema.
+
+![image](https://github.com/user-attachments/assets/5a933e7b-18de-4121-8b97-62c475cf7617) 
+
 
 ---
 
