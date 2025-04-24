@@ -29,7 +29,8 @@ This will create the file your chatbot pipeline expects, with all fields (`name`
 
 ## Architecture
 
-![Architecture Diagram](uploads/Bot_Architecture.png)
+![Architecture Diagram](![Bot_Architecture](https://github.com/user-attachments/assets/232b2ae1-0d31-45f9-ad99-1c70c4d99d69)
+
 
 - **Data Pipeline**: Scraped JSON is flattened, preprocessed, and turned into embedding vectors
 - **Retrieval**: Chroma vector store finds top relevant menu/restaurant chunks for a user query
