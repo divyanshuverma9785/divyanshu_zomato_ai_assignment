@@ -6,10 +6,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import warnings, os
 from dotenv import load_dotenv
-warnings.filterwarnings("ignore")
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,7 +14,6 @@ load_dotenv()
 data_directory = os.path.join(os.path.dirname(__file__), "data")
 
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
-# st.secrets["huggingface_api_token"] # Don't forget to add your hugging face token
 
 # Load the vector store from disk
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -25,38 +21,39 @@ vector_store = Chroma(embedding_function=embedding_model, persist_directory=data
 
 # Initialize the Hugging Face Hub LLM
 hf_hub_llm = HuggingFaceHub(
-     repo_id="meta-llama/Meta-Llama-3-8B-Instruct",
-    # repo_id="mistralai/Mistral-7B-Instruct-v0.3",
-    model_kwargs={"temperature": 1, "max_new_tokens":1024},
+    repo_id="meta-llama/Meta-Llama-3-8B-Instruct",
+    model_kwargs={"temperature": 0.7, "max_new_tokens": 1024},
 )
 
 prompt_template = """
-As a highly knowledgeable fashion assistant, your role is to accurately interpret fashion queries and 
-provide responses using our specialized fashion database. Follow these directives to ensure optimal user interactions:
-1. Precision in Answers: Respond solely with information directly relevant to the user's query from our fashion database. 
-    Refrain from making assumptions or adding extraneous details.
-2. Topic Relevance: Limit your expertise to specific fashion-related areas:
-    - Fashion Trends
-    - Personal Styling Advice
-    - Seasonal Wardrobe Selections
-    - Accessory Recommendations
-3. Handling Off-topic Queries: For questions unrelated to fashion (e.g., general knowledge questions like "Why is the sky blue?"), 
-    politely inform the user that the query is outside the chatbot’s scope and suggest redirecting to fashion-related inquiries.
-4. Promoting Fashion Awareness: Craft responses that emphasize good fashion sense, aligning with the latest trends and 
-    personalized style recommendations.
-5. Contextual Accuracy: Ensure responses are directly related to the fashion query, utilizing only pertinent 
-    information from our database.
-6. Relevance Check: If a query does not align with our fashion database, guide the user to refine their 
-    question or politely decline to provide an answer.
-7. Avoiding Duplication: Ensure no response is repeated within the same interaction, maintaining uniqueness and 
-    relevance to each user query.
-8. Streamlined Communication: Eliminate any unnecessary comments or closing remarks from responses. Focus on
-    delivering clear, concise, and direct answers.
-9. Avoid Non-essential Sign-offs: Do not include any sign-offs like "Best regards" or "FashionBot" in responses.
-10. One-time Use Phrases: Avoid using the same phrases multiple times within the same response. Each 
-    sentence should be unique and contribute to the overall message without redundancy.
+As a knowledgeable restaurant assistant, your role is to accurately interpret food and restaurant queries and 
+provide responses using our specialized restaurant database. Follow these directives to ensure optimal user interactions:
 
-Fashion Query:
+1. Precision in Answers: Respond solely with information directly relevant to the user's query from our restaurant database. 
+   Refrain from making assumptions or adding extraneous details.
+   
+2. Topic Relevance: Limit your expertise to specific restaurant-related areas:
+   - Restaurant Information (location, hours, contact)
+   - Menu Items and Categories
+   - Food Descriptions and Ingredients
+   - Pricing Information
+   - Dietary Preferences (Veg/Non-Veg, Spice Levels)
+   
+3. Handling Off-topic Queries: For questions unrelated to restaurants or food, politely inform the user that the query 
+   is outside the chatbot's scope and suggest redirecting to restaurant-related inquiries.
+   
+4. Contextual Accuracy: Ensure responses are directly related to the restaurant query, utilizing only pertinent 
+   information from our database.
+   
+5. Relevance Check: If a query does not align with our restaurant database, guide the user to refine their 
+   question or politely decline to provide an answer.
+   
+6. Streamlined Communication: Eliminate any unnecessary comments or closing remarks from responses. Focus on
+   delivering clear, concise, and direct answers.
+   
+7. Personalized Recommendations: When appropriate, provide personalized food recommendations based on user preferences.
+
+Restaurant Query:
 {context}
 
 Question: {question}
@@ -69,7 +66,7 @@ custom_prompt = PromptTemplate(template=prompt_template, input_variables=["conte
 rag_chain = RetrievalQA.from_chain_type(
     llm=hf_hub_llm, 
     chain_type="stuff", 
-    retriever=vector_store.as_retriever(top_k=3),  # retriever is set to fetch top 3 results
+    retriever=vector_store.as_retriever(top_k=5),  # Increased to fetch top 5 results to cover multiple restaurants
     chain_type_kwargs={"prompt": custom_prompt})
 
 def get_response(question):
@@ -82,49 +79,47 @@ def get_response(question):
 # Streamlit app
 # Remove whitespace from the top of the page and sidebar
 st.markdown(
-        """
-            <style>
-                .appview-container .main .block-container {{
-                    padding-top: {padding_top}rem;
-                    padding-bottom: {padding_bottom}rem;
-                    }}
+    """
+        <style>
+            .appview-container .main .block-container {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+        </style>""",
+    unsafe_allow_html=True,
+)
 
-            </style>""".format(
-            padding_top=1, padding_bottom=1
-        ),
-        unsafe_allow_html=True,
-    )
-
-# st.header("### Discover the AI styling recommendations :dress:", divider='grey')
 st.markdown("""
-    <h3 style='text-align: left; color: black; padding-top: 35px; border-bottom: 3px solid red;'>
-        Discover the AI Styling Recommendations 👗👠
+    <h3 style='text-align: left; color: black; padding-top: 35px; border-bottom: 3px solid orange;'>
+        Discover Local Restaurants & Menus 🍽️🥘
     </h3>""", unsafe_allow_html=True)
 
-
 side_bar_message = """
-Hi! 👋 I'm here to help you with your fashion choices. What would you like to know or explore?
-\nHere are some areas you might be interested in:
-1. **Fashion Trends** 👕👖
-2. **Personal Styling Advice** 👢🧢
-3. **Seasonal Wardrobe Selections** 🌞
-4. **Accessory Recommendations** 💍
+Hi! 👋 I'm your restaurant guide for Roorkee. What would you like to know about local restaurants?
 
-Feel free to ask me anything about fashion!
+Here are some areas you might be interested in:
+1. **Restaurant Information** 🏢
+2. **Menu Recommendations** 🍲
+3. **Vegetarian Options** 🥗
+4. **Spice Level Preferences** 🌶️
+5. **Popular Dishes** ⭐
+
+Feel free to ask me anything about the restaurants in our database!
 """
 
 with st.sidebar:
-    st.title('🤖FashionBot: Your AI Style Companion')
+    st.title('🤖FoodBot: Your Local Restaurant Guide')
     st.markdown(side_bar_message)
 
 initial_message = """
-    Hi there! I'm your FashionBot 🤖 
+    Hi there! I'm your FoodBot 🤖 
     Here are some questions you might ask me:\n
-     🎀What are the top fashion trends this summer?\n
-     🎀Can you suggest an outfit for a summer wedding?\n
-     🎀What are some must-have accessories for winter season?\n
-     🎀What type of shoes should I wear with a cocktail dress?\n
-     🎀What's the best look for a professional photo shoot?
+    🍽️ What restaurants are available in Roorkee?\n
+    🍽️ Tell me about Hotel Prakash's menu\n
+    🍽️ What vegetarian options are available?\n
+    🍽️ What are the operating hours of restaurants in Roorkee?\n
+    🍽️ Can you recommend some spicy dishes?\n
+    🍽️ What's the price range for rolls at Hotel Prakash?
 """
 
 # Store LLM generated responses
@@ -138,6 +133,7 @@ for message in st.session_state.messages:
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": initial_message}]
+    
 st.button('Clear Chat', on_click=clear_chat_history)
 
 # User-provided prompt
@@ -149,10 +145,10 @@ if prompt := st.chat_input():
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
-        with st.spinner("Hold on, I'm fetching the latest fashion advice for you..."):
+        with st.spinner("Finding the best food recommendations for you..."):
             response = get_response(prompt)
             placeholder = st.empty()
-            full_response = response  # Directly use the response
+            full_response = response
             placeholder.markdown(full_response)
     message = {"role": "assistant", "content": full_response}
     st.session_state.messages.append(message)
