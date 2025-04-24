@@ -1,0 +1,16 @@
+streamlit
+langchain
+langchain-community
+langchain-huggingface
+chromadb
+sentence-transformers
+python-dotenv
+transformers
+accelerate
+tqdm
+selenium
+webdriver-manager
+bs4
+requests
+pandas
+matplotlib
