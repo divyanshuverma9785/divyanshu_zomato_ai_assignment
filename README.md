@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/d7393d8c-b05e-402b-a0b6-c99f702fcb23)# Roorkee Restaurants RAG Chatbot
+# Roorkee Restaurants RAG Chatbot
 
 ## Overview
 This project provides a fully local, open-source RAG (Retrieval Augmented Generation) conversational assistant that answers queries about top restaurants and their menus in Roorkee, India. The system uses scraped restaurant data, advanced text embeddings, and a Hugging Face LLM to power natural, context-rich food and restaurant Q&A.
