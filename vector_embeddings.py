@@ -1,4 +1,4 @@
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import JSONLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
@@ -12,7 +12,10 @@ load_dotenv()
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
 # Load the PDF
-loader = PyPDFLoader("fashion_data.pdf")  # Provide your PDF path here
+loader = JSONLoader(
+    file_path='Merge.json',
+    jq_schema='.',
+    text_content=False)
 documents = loader.load()
 
 # Split the text
